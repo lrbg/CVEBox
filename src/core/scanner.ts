@@ -44,7 +44,7 @@ export class Scanner {
         await page.goto(target.url, { waitUntil: 'networkidle', timeout: 10000 }).catch(() => {});
       }
 
-      const sessionValid = await validateSession(page);
+      const sessionValid = await validateSession(page, target);
       if (!sessionValid && (target.username || target.password)) {
         console.log(chalk.yellow('  [SESSION] Session validation inconclusive, continuing...'));
       }

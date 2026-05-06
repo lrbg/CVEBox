@@ -18,6 +18,7 @@ export interface Target {
   usernameSelector?: string;
   passwordSelector?: string;
   submitSelector?: string;
+  postLoginUrlContains?: string;
   apiHeaders?: Record<string, string>;
   surfaces?: SurfaceType[];
 }

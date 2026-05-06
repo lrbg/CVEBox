@@ -22,6 +22,7 @@ export function loadTargets(): Target[] {
       usernameSelector: process.env[`TARGET${suffix}_USERNAME_SELECTOR`],
       passwordSelector: process.env[`TARGET${suffix}_PASSWORD_SELECTOR`],
       submitSelector: process.env[`TARGET${suffix}_SUBMIT_SELECTOR`],
+      postLoginUrlContains: process.env[`TARGET${suffix}_POST_LOGIN_URL_CONTAINS`],
       apiHeaders: parseHeaders(process.env[`TARGET${suffix}_API_HEADERS`]),
     });
 

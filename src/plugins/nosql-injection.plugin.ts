@@ -60,6 +60,7 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       // Capture baseline BEFORE any injection to avoid false positives
       // caused by persistent navbar elements (e.g. "My account").
       const baselineContent = await ctx.page.content();
+      const baselineUrl = ctx.page.url();
 
       for (const field of fields) {
         for (const payload of this.payloads) {
@@ -71,7 +72,9 @@ export class NoSqlInjectionPlugin extends BasePlugin {
             );
             const hasAuthBypass = await detectAuthBypass(
               ctx.page,
-              baselineContent
+              baselineContent,
+              baselineUrl,
+              ctx.target
             );
             if (hasError || hasAuthBypass) {
               findings.push(
