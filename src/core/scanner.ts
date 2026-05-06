@@ -38,15 +38,17 @@ export class Scanner {
         await page.goto(target.url, { waitUntil: 'networkidle', timeout: 15000 });
       }
 
-      // Navigate to target URL
-      const currentUrl = page.url();
-      if (currentUrl !== target.url) {
-        await page.goto(target.url, { waitUntil: 'networkidle', timeout: 10000 }).catch(() => {});
-      }
+      // Always navigate to TARGET_URL (the page to scan), not the login URL.
+      // After auth the browser may be on the post-login redirect — we want
+      // to scan the URL the user explicitly configured, not wherever auth landed.
+      console.log(chalk.gray(`  [NAV] Navigating to scan target: ${target.url}`));
+      await page.goto(target.url, { waitUntil: 'networkidle', timeout: 15000 }).catch(() => {});
 
       const sessionValid = await validateSession(page, target);
-      if (!sessionValid && (target.username || target.password)) {
-        console.log(chalk.yellow('  [SESSION] Session validation inconclusive, continuing...'));
+      if (sessionValid) {
+        console.log(chalk.green('  [SESSION] Authenticated session confirmed'));
+      } else if (target.username || target.password) {
+        console.log(chalk.yellow('  [SESSION] Session check inconclusive — check TARGET_POST_LOGIN_URL_CONTAINS in .env'));
       }
 
       // Run selected plugins
