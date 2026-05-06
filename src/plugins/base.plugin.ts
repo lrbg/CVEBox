@@ -16,7 +16,9 @@ export abstract class BasePlugin {
     surface: SurfaceType,
     field: string,
     evidence: string,
-    remediation: string
+    remediation: string,
+    screenshotBefore?: string,
+    screenshotAfter?: string
   ): Finding {
     return {
       pluginId: this.id,
@@ -32,6 +34,8 @@ export abstract class BasePlugin {
       evidence,
       remediation,
       timestamp: new Date().toISOString(),
+      screenshotBefore,
+      screenshotAfter,
     };
   }
 

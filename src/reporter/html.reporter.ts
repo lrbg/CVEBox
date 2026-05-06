@@ -115,6 +115,20 @@ export class HtmlReporter {
     .no-findings-icon { font-size: 48px; color: #38a169; margin-bottom: 12px; }
     .no-findings p { color: #718096; font-size: 16px; }
 
+    .screenshot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+    .screenshot-box { background: #f7fafc; border: 1px solid #e2e8f0; border-radius: 6px; overflow: hidden; }
+    .screenshot-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; padding: 8px 12px; display: flex; align-items: center; gap: 6px; }
+    .screenshot-label.before { background: #ebf8ff; color: #2b6cb0; border-bottom: 1px solid #bee3f8; }
+    .screenshot-label.after  { background: #fff5f5; color: #c53030; border-bottom: 1px solid #fed7d7; }
+    .screenshot-img { width: 100%; display: block; cursor: zoom-in; transition: opacity 0.15s; }
+    .screenshot-img:hover { opacity: 0.92; }
+
+    /* Lightbox */
+    .lb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; }
+    .lb-overlay.open { display: flex; }
+    .lb-overlay img { max-width: 92vw; max-height: 90vh; border-radius: 6px; box-shadow: 0 8px 40px rgba(0,0,0,0.5); }
+    .lb-close { position: fixed; top: 16px; right: 24px; color: white; font-size: 32px; cursor: pointer; line-height: 1; }
+
     .target-info { background: white; border-radius: 8px; padding: 20px 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
     .target-info table { width: 100%; border-collapse: collapse; }
     .target-info td { padding: 6px 0; font-size: 13px; vertical-align: top; }
@@ -191,12 +205,33 @@ export class HtmlReporter {
   CVEBox · Automated Security Scanner · Report for <strong>${this.esc(target.name)}</strong> · ${dayjs(startedAt).format('YYYY-MM-DD')}
 </div>
 
+<!-- Lightbox overlay for full-size screenshots -->
+<div class="lb-overlay" id="lb-overlay">
+  <span class="lb-close" onclick="closeLightbox()">&#x2715;</span>
+  <img id="lb-img" src="" alt="Screenshot" />
+</div>
+
 <script>
   document.querySelectorAll('.finding-header').forEach(function(header) {
     header.addEventListener('click', function() {
       var body = this.nextElementSibling;
       body.classList.toggle('open');
     });
+  });
+
+  function openLightbox(src) {
+    document.getElementById('lb-img').src = src;
+    document.getElementById('lb-overlay').classList.add('open');
+  }
+  function closeLightbox() {
+    document.getElementById('lb-overlay').classList.remove('open');
+    document.getElementById('lb-img').src = '';
+  }
+  document.getElementById('lb-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLightbox();
   });
 </script>
 </body>
@@ -260,8 +295,41 @@ export class HtmlReporter {
       <div class="block-label">Recommended Fix</div>
       <div class="remediation-block">${this.esc(f.remediation)}</div>
     </div>
+
+    ${this.buildScreenshots(f)}
   </div>
 </div>`;
+  }
+
+  private buildScreenshots(f: Finding): string {
+    const hasBefore = f.screenshotBefore && f.screenshotBefore.length > 0;
+    const hasAfter = f.screenshotAfter && f.screenshotAfter.length > 0;
+    if (!hasBefore && !hasAfter) return '';
+
+    const beforeHtml = hasBefore
+      ? `<div class="screenshot-box">
+           <div class="screenshot-label before">📷 Before Injection — Page state before payload was sent</div>
+           <img class="screenshot-img" src="data:image/png;base64,${f.screenshotBefore}"
+                alt="Before injection" onclick="openLightbox(this.src)" />
+         </div>`
+      : '';
+
+    const afterHtml = hasAfter
+      ? `<div class="screenshot-box">
+           <div class="screenshot-label after">🔴 After Injection — Response / evidence captured</div>
+           <img class="screenshot-img" src="data:image/png;base64,${f.screenshotAfter}"
+                alt="After injection — evidence" onclick="openLightbox(this.src)" />
+         </div>`
+      : '';
+
+    return `
+    <div class="section-block">
+      <div class="block-label">Visual Evidence — Click any screenshot to enlarge</div>
+      <div class="screenshot-grid">
+        ${beforeHtml}
+        ${afterHtml}
+      </div>
+    </div>`;
   }
 
   private esc(str: string): string {

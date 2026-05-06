@@ -46,6 +46,8 @@ export interface Finding {
   evidence: string;
   remediation: string;
   timestamp: string;
+  screenshotBefore?: string;  // base64 PNG — page state before injection
+  screenshotAfter?: string;   // base64 PNG — page state after injection (evidence)
 }
 
 export interface ScanResult {

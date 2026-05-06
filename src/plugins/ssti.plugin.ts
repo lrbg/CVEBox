@@ -3,6 +3,7 @@ import { BasePlugin } from './base.plugin';
 import { Finding, Payload, PluginContext } from '../types';
 import { FormSurface } from '../surfaces/form.surface';
 import { QueryParamSurface } from '../surfaces/query-param.surface';
+import { takeScreenshot } from '../core/screenshot';
 
 const SSTI_PROBE_RESULT = '49';
 
@@ -49,20 +50,19 @@ export class SstiPlugin extends BasePlugin {
       for (const field of fields) {
         for (const payload of this.payloads) {
           try {
+            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
             const isVuln =
               result.includes(SSTI_PROBE_RESULT) ||
               this.isVulnerableResponse(result, SSTI_ERROR_PATTERNS);
 
             if (isVuln) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'form',
-                  field.name,
+                  ctx, payload, 'form', field.name,
                   `SSTI probe evaluated: payload "${payload.value}" produced output containing "${SSTI_PROBE_RESULT}" or template error in field "${field.name}"`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -80,24 +80,19 @@ export class SstiPlugin extends BasePlugin {
       for (const param of params) {
         for (const payload of this.payloads) {
           try {
-            const result = await qpSurface.inject(
-              ctx.target.url,
-              param,
-              payload.value
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             const isVuln =
               result.includes(SSTI_PROBE_RESULT) ||
               this.isVulnerableResponse(result, SSTI_ERROR_PATTERNS);
 
             if (isVuln) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'query-param',
-                  param,
+                  ctx, payload, 'query-param', param,
                   `SSTI probe evaluated in query param "${param}": "${payload.value}" → "${SSTI_PROBE_RESULT}" found in response`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }

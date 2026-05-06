@@ -4,6 +4,7 @@ import { Finding, Payload, PluginContext } from '../types';
 import { FormSurface } from '../surfaces/form.surface';
 import { QueryParamSurface } from '../surfaces/query-param.surface';
 import { ApiBodySurface } from '../surfaces/api-body.surface';
+import { takeScreenshot } from '../core/screenshot';
 
 const SQL_ERROR_PATTERNS = [
   'sql syntax',
@@ -52,16 +53,15 @@ export class SqlInjectionPlugin extends BasePlugin {
       for (const field of fields) {
         for (const payload of this.payloads) {
           try {
+            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
             if (this.isVulnerableResponse(result, SQL_ERROR_PATTERNS)) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'form',
-                  field.name,
+                  ctx, payload, 'form', field.name,
                   `SQL error detected in response after injecting payload into field "${field.name}": ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -79,20 +79,15 @@ export class SqlInjectionPlugin extends BasePlugin {
       for (const param of params) {
         for (const payload of this.payloads) {
           try {
-            const result = await qpSurface.inject(
-              ctx.target.url,
-              param,
-              payload.value
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             if (this.isVulnerableResponse(result, SQL_ERROR_PATTERNS)) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'query-param',
-                  param,
+                  ctx, payload, 'query-param', param,
                   `SQL error in response after injecting payload into query param "${param}": ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -110,21 +105,15 @@ export class SqlInjectionPlugin extends BasePlugin {
       for (const endpoint of endpoints) {
         for (const payload of this.payloads) {
           try {
-            const result = await apiSurface.inject(
-              endpoint.url,
-              endpoint.method,
-              endpoint.sampleBody,
-              payload.value
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await apiSurface.inject(endpoint.url, endpoint.method, endpoint.sampleBody, payload.value);
             if (this.isVulnerableResponse(result, SQL_ERROR_PATTERNS)) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'api-body',
-                  endpoint.url,
+                  ctx, payload, 'api-body', endpoint.url,
                   `SQL error in API response after injecting payload into ${endpoint.method} ${endpoint.url}: ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }

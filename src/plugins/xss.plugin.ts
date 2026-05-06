@@ -4,6 +4,7 @@ import { Finding, Payload, PluginContext } from '../types';
 import { FormSurface } from '../surfaces/form.surface';
 import { QueryParamSurface } from '../surfaces/query-param.surface';
 import { HeaderSurface } from '../surfaces/header.surface';
+import { takeScreenshot } from '../core/screenshot';
 
 const XSS_MARKER = 'CVEBox-XSS';
 
@@ -36,34 +37,28 @@ export class XssPlugin extends BasePlugin {
       for (const field of fields) {
         for (const payload of this.payloads) {
           try {
+            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
-            if (
-              result.includes(XSS_MARKER) ||
-              result.includes('<script>') ||
-              result.includes('onerror=')
-            ) {
+
+            if (result.includes(XSS_MARKER) || result.includes('<script>') || result.includes('onerror=')) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'form',
-                  field.name,
+                  ctx, payload, 'form', field.name,
                   `XSS payload reflected unescaped in response after injecting into "${field.name}". Payload: ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
 
             const dialogTriggered = await this.checkDialogTriggered(ctx);
             if (dialogTriggered) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'form',
-                  field.name,
+                  ctx, payload, 'form', field.name,
                   `XSS payload triggered a JavaScript dialog (alert/confirm/prompt) in field "${field.name}". Payload: ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -81,20 +76,15 @@ export class XssPlugin extends BasePlugin {
       for (const param of params) {
         for (const payload of this.payloads) {
           try {
-            const result = await qpSurface.inject(
-              ctx.target.url,
-              param,
-              payload.value
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             if (result.includes(XSS_MARKER) || result.includes('<script>')) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'query-param',
-                  param,
+                  ctx, payload, 'query-param', param,
                   `XSS payload reflected in query param "${param}" response. Payload: ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -110,20 +100,15 @@ export class XssPlugin extends BasePlugin {
 
       for (const payload of this.payloads) {
         try {
-          const result = await headerSurface.inject(
-            ctx.target.url,
-            'X-Forwarded-For',
-            payload.value
-          );
+          const screenshotBefore = await takeScreenshot(ctx.page);
+          const result = await headerSurface.inject(ctx.target.url, 'X-Forwarded-For', payload.value);
           if (result.includes(XSS_MARKER)) {
+            const screenshotAfter = await takeScreenshot(ctx.page);
             findings.push(
               this.createFinding(
-                ctx,
-                payload,
-                'header',
-                'X-Forwarded-For',
+                ctx, payload, 'header', 'X-Forwarded-For',
                 `XSS payload reflected from X-Forwarded-For header. Payload: ${payload.value}`,
-                REMEDIATION
+                REMEDIATION, screenshotBefore, screenshotAfter
               )
             );
           }

@@ -5,6 +5,7 @@ import { FormSurface } from '../surfaces/form.surface';
 import { ApiBodySurface } from '../surfaces/api-body.surface';
 import { detectAuthBypass } from '../core/auth';
 import { QueryParamSurface } from '../surfaces/query-param.surface';
+import { takeScreenshot } from '../core/screenshot';
 
 const NOSQL_ERROR_PATTERNS = [
   'mongoerror',
@@ -19,9 +20,6 @@ const NOSQL_ERROR_PATTERNS = [
   'document failed validation',
 ];
 
-// Only match indicators that strongly suggest an auth bypass occurred.
-// Avoid generic words (e.g. "account", "welcome") that appear in navbars
-// even on non-authenticated pages and cause false positives.
 const NOSQL_SUCCESS_INDICATORS = [
   'sign out',
   'log out',
@@ -57,34 +55,24 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       const formSurface = new FormSurface(ctx.page);
       const fields = await formSurface.discoverFields();
 
-      // Capture baseline BEFORE any injection to avoid false positives
-      // caused by persistent navbar elements (e.g. "My account").
       const baselineContent = await ctx.page.content();
       const baselineUrl = ctx.page.url();
 
       for (const field of fields) {
         for (const payload of this.payloads) {
           try {
+            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
-            const hasError = this.isVulnerableResponse(
-              result,
-              NOSQL_ERROR_PATTERNS
-            );
-            const hasAuthBypass = await detectAuthBypass(
-              ctx.page,
-              baselineContent,
-              baselineUrl,
-              ctx.target
-            );
+            const hasError = this.isVulnerableResponse(result, NOSQL_ERROR_PATTERNS);
+            const hasAuthBypass = await detectAuthBypass(ctx.page, baselineContent, baselineUrl, ctx.target);
+
             if (hasError || hasAuthBypass) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'form',
-                  field.name,
+                  ctx, payload, 'form', field.name,
                   `NoSQL indicator detected after injecting into "${field.name}": ${payload.value}. ${hasAuthBypass ? 'Auth state changed after injection (bypass suspected).' : 'NoSQL error pattern leaked in response.'}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -102,29 +90,18 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       for (const endpoint of endpoints) {
         for (const payload of this.payloads) {
           try {
-            const result = await apiSurface.inject(
-              endpoint.url,
-              endpoint.method,
-              endpoint.sampleBody,
-              payload.value
-            );
-            const hasError = this.isVulnerableResponse(
-              result,
-              NOSQL_ERROR_PATTERNS
-            );
-            const hasSuccess = this.isVulnerableResponse(
-              result,
-              NOSQL_SUCCESS_INDICATORS
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await apiSurface.inject(endpoint.url, endpoint.method, endpoint.sampleBody, payload.value);
+            const hasError = this.isVulnerableResponse(result, NOSQL_ERROR_PATTERNS);
+            const hasSuccess = this.isVulnerableResponse(result, NOSQL_SUCCESS_INDICATORS);
+
             if (hasError || hasSuccess) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'api-body',
-                  endpoint.url,
+                  ctx, payload, 'api-body', endpoint.url,
                   `NoSQL indicator in API response for ${endpoint.method} ${endpoint.url}: ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
@@ -142,20 +119,15 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       for (const param of params) {
         for (const payload of this.payloads) {
           try {
-            const result = await qpSurface.inject(
-              ctx.target.url,
-              param,
-              payload.value
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             if (this.isVulnerableResponse(result, NOSQL_ERROR_PATTERNS)) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'query-param',
-                  param,
+                  ctx, payload, 'query-param', param,
                   `NoSQL error in response after injecting into query param "${param}": ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }

@@ -3,6 +3,7 @@ import { BasePlugin } from './base.plugin';
 import { Finding, Payload, PluginContext } from '../types';
 import { QueryParamSurface } from '../surfaces/query-param.surface';
 import { ApiBodySurface } from '../surfaces/api-body.surface';
+import { takeScreenshot } from '../core/screenshot';
 
 const POLLUTION_MARKER = 'CVEBox';
 
@@ -46,23 +47,19 @@ export class PrototypePollutionPlugin extends BasePlugin {
 
       for (const payload of queryPayloads) {
         try {
-          const result = await qpSurface.injectRaw(
-            ctx.target.url,
-            payload.value
-          );
+          const screenshotBefore = await takeScreenshot(ctx.page);
+          const result = await qpSurface.injectRaw(ctx.target.url, payload.value);
           const isPolluted =
             result.includes(POLLUTION_MARKER) ||
             this.isVulnerableResponse(result, POLLUTION_ERROR_PATTERNS);
 
           if (isPolluted) {
+            const screenshotAfter = await takeScreenshot(ctx.page);
             findings.push(
               this.createFinding(
-                ctx,
-                payload,
-                'query-param',
-                '__proto__',
+                ctx, payload, 'query-param', '__proto__',
                 `Prototype pollution detected via query param: ${payload.value}. Response contained pollution marker or error.`,
-                REMEDIATION
+                REMEDIATION, screenshotBefore, screenshotAfter
               )
             );
           }
@@ -82,24 +79,19 @@ export class PrototypePollutionPlugin extends BasePlugin {
       for (const endpoint of endpoints) {
         for (const payload of bodyPayloads) {
           try {
-            const result = await apiSurface.injectRaw(
-              endpoint.url,
-              endpoint.method,
-              payload.value
-            );
+            const screenshotBefore = await takeScreenshot(ctx.page);
+            const result = await apiSurface.injectRaw(endpoint.url, endpoint.method, payload.value);
             const isPolluted =
               result.includes(POLLUTION_MARKER) ||
               this.isVulnerableResponse(result, POLLUTION_ERROR_PATTERNS);
 
             if (isPolluted) {
+              const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
-                  ctx,
-                  payload,
-                  'api-body',
-                  endpoint.url,
+                  ctx, payload, 'api-body', endpoint.url,
                   `Prototype pollution in API body for ${endpoint.method} ${endpoint.url}: ${payload.value}`,
-                  REMEDIATION
+                  REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
             }
