@@ -5,14 +5,10 @@ const LOGIN_SUCCESS_INDICATORS = [
   'logout',
   'sign out',
   'cerrar sesion',
-  'dashboard',
-  'welcome',
-  'bienvenido',
-  'account',
-  'mi cuenta',
-  'profile',
-  'perfil',
-  'my account',
+  'log out',
+  'logged in as',
+  'welcome back',
+  'bienvenido de nuevo',
 ];
 
 const LOGIN_FAILURE_INDICATORS = [
@@ -106,6 +102,20 @@ export async function authenticate(
 export async function validateSession(page: Page): Promise<boolean> {
   const content = (await page.content()).toLowerCase();
   return LOGIN_SUCCESS_INDICATORS.some((i) => content.includes(i));
+}
+
+// Stricter check: compares page content BEFORE and AFTER injection
+// to detect a real state change vs. just a persistent navbar element.
+export async function detectAuthBypass(
+  page: Page,
+  baselineContent: string
+): Promise<boolean> {
+  const current = (await page.content()).toLowerCase();
+  const baseline = baselineContent.toLowerCase();
+  return (
+    LOGIN_SUCCESS_INDICATORS.some((i) => current.includes(i)) &&
+    !LOGIN_SUCCESS_INDICATORS.some((i) => baseline.includes(i))
+  );
 }
 
 async function detectUsernameField(page: Page): Promise<string | null> {

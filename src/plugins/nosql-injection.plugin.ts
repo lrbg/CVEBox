@@ -3,6 +3,7 @@ import { BasePlugin } from './base.plugin';
 import { Finding, Payload, PluginContext } from '../types';
 import { FormSurface } from '../surfaces/form.surface';
 import { ApiBodySurface } from '../surfaces/api-body.surface';
+import { detectAuthBypass } from '../core/auth';
 import { QueryParamSurface } from '../surfaces/query-param.surface';
 
 const NOSQL_ERROR_PATTERNS = [
@@ -18,13 +19,16 @@ const NOSQL_ERROR_PATTERNS = [
   'document failed validation',
 ];
 
+// Only match indicators that strongly suggest an auth bypass occurred.
+// Avoid generic words (e.g. "account", "welcome") that appear in navbars
+// even on non-authenticated pages and cause false positives.
 const NOSQL_SUCCESS_INDICATORS = [
-  'welcome',
-  'dashboard',
-  'logout',
-  'profile',
-  'account',
-  'logged in',
+  'sign out',
+  'log out',
+  'cerrar sesion',
+  'logged in as',
+  'welcome back',
+  'your account has been',
 ];
 
 const REMEDIATION =
@@ -53,6 +57,10 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       const formSurface = new FormSurface(ctx.page);
       const fields = await formSurface.discoverFields();
 
+      // Capture baseline BEFORE any injection to avoid false positives
+      // caused by persistent navbar elements (e.g. "My account").
+      const baselineContent = await ctx.page.content();
+
       for (const field of fields) {
         for (const payload of this.payloads) {
           try {
@@ -61,18 +69,18 @@ export class NoSqlInjectionPlugin extends BasePlugin {
               result,
               NOSQL_ERROR_PATTERNS
             );
-            const hasSuccess = this.isVulnerableResponse(
-              result,
-              NOSQL_SUCCESS_INDICATORS
+            const hasAuthBypass = await detectAuthBypass(
+              ctx.page,
+              baselineContent
             );
-            if (hasError || hasSuccess) {
+            if (hasError || hasAuthBypass) {
               findings.push(
                 this.createFinding(
                   ctx,
                   payload,
                   'form',
                   field.name,
-                  `NoSQL indicator detected after injecting into "${field.name}": ${payload.value}. ${hasSuccess ? 'Unexpected authentication success.' : 'NoSQL error leaked.'}`,
+                  `NoSQL indicator detected after injecting into "${field.name}": ${payload.value}. ${hasAuthBypass ? 'Auth state changed after injection (bypass suspected).' : 'NoSQL error pattern leaked in response.'}`,
                   REMEDIATION
                 )
               );
