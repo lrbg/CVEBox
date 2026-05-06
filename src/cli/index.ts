@@ -104,13 +104,25 @@ async function runScan(options: ScanOptions): Promise<void> {
   const reportPaths: string[] = [];
 
   for (const target of targets) {
-    const result = await scanner.scan(target, options);
+    let result;
+    try {
+      result = await scanner.scan(target, options);
+    } catch (err: unknown) {
+      console.error(chalk.red(`\n  [ERROR] Scan failed for "${target.name}": ${err instanceof Error ? err.message : String(err)}`));
+      // Generate a partial report so the user always gets a file
+      result = {
+        target,
+        startedAt: new Date().toISOString(),
+        finishedAt: new Date().toISOString(),
+        findings: [],
+        totalTested: 0,
+        passed: false,
+      };
+    }
+
     const reportPath = reporter.generate(result, reportsDir);
     reportPaths.push(reportPath);
-
-    console.log(
-      chalk.bold(`\n  Report saved → `) + chalk.underline(reportPath)
-    );
+    console.log(chalk.bold(`\n  Report saved → `) + chalk.underline(reportPath));
   }
 
   console.log(chalk.bold.green('\n  ✓ All scans completed.\n'));

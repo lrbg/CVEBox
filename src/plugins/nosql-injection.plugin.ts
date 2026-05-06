@@ -54,14 +54,13 @@ export class NoSqlInjectionPlugin extends BasePlugin {
     if (ctx.surfaces.includes('form')) {
       const formSurface = new FormSurface(ctx.page);
       const fields = await formSurface.discoverFields();
-
       const baselineContent = await ctx.page.content();
       const baselineUrl = ctx.page.url();
 
       for (const field of fields) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
             const hasError = this.isVulnerableResponse(result, NOSQL_ERROR_PATTERNS);
             const hasAuthBypass = await detectAuthBypass(ctx.page, baselineContent, baselineUrl, ctx.target);
@@ -75,6 +74,7 @@ export class NoSqlInjectionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
@@ -88,9 +88,9 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       const endpoints = await apiSurface.discoverEndpoints();
 
       for (const endpoint of endpoints) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await apiSurface.inject(endpoint.url, endpoint.method, endpoint.sampleBody, payload.value);
             const hasError = this.isVulnerableResponse(result, NOSQL_ERROR_PATTERNS);
             const hasSuccess = this.isVulnerableResponse(result, NOSQL_SUCCESS_INDICATORS);
@@ -104,6 +104,7 @@ export class NoSqlInjectionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
@@ -117,9 +118,9 @@ export class NoSqlInjectionPlugin extends BasePlugin {
       const params = await qpSurface.discoverParams(ctx.target.url);
 
       for (const param of params) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             if (this.isVulnerableResponse(result, NOSQL_ERROR_PATTERNS)) {
               const screenshotAfter = await takeScreenshot(ctx.page);
@@ -130,6 +131,7 @@ export class NoSqlInjectionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue

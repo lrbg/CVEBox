@@ -48,9 +48,9 @@ export class SstiPlugin extends BasePlugin {
       const fields = await formSurface.discoverFields();
 
       for (const field of fields) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
             const isVuln =
               result.includes(SSTI_PROBE_RESULT) ||
@@ -65,6 +65,7 @@ export class SstiPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
@@ -78,9 +79,9 @@ export class SstiPlugin extends BasePlugin {
       const params = await qpSurface.discoverParams(ctx.target.url);
 
       for (const param of params) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             const isVuln =
               result.includes(SSTI_PROBE_RESULT) ||
@@ -95,6 +96,7 @@ export class SstiPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue

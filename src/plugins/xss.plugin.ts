@@ -35,12 +35,16 @@ export class XssPlugin extends BasePlugin {
       const fields = await formSurface.discoverFields();
 
       for (const field of fields) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
+            const reflected =
+              result.includes(XSS_MARKER) ||
+              result.includes('<script>') ||
+              result.includes('onerror=');
 
-            if (result.includes(XSS_MARKER) || result.includes('<script>') || result.includes('onerror=')) {
+            if (reflected) {
               const screenshotAfter = await takeScreenshot(ctx.page);
               findings.push(
                 this.createFinding(
@@ -49,6 +53,7 @@ export class XssPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
 
             const dialogTriggered = await this.checkDialogTriggered(ctx);
@@ -61,6 +66,7 @@ export class XssPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
@@ -74,9 +80,9 @@ export class XssPlugin extends BasePlugin {
       const params = await qpSurface.discoverParams(ctx.target.url);
 
       for (const param of params) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             if (result.includes(XSS_MARKER) || result.includes('<script>')) {
               const screenshotAfter = await takeScreenshot(ctx.page);
@@ -87,6 +93,7 @@ export class XssPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
@@ -97,10 +104,10 @@ export class XssPlugin extends BasePlugin {
 
     if (ctx.surfaces.includes('header')) {
       const headerSurface = new HeaderSurface(ctx.page);
+      const screenshotBefore = await takeScreenshot(ctx.page);
 
       for (const payload of this.payloads) {
         try {
-          const screenshotBefore = await takeScreenshot(ctx.page);
           const result = await headerSurface.inject(ctx.target.url, 'X-Forwarded-For', payload.value);
           if (result.includes(XSS_MARKER)) {
             const screenshotAfter = await takeScreenshot(ctx.page);
@@ -111,6 +118,7 @@ export class XssPlugin extends BasePlugin {
                 REMEDIATION, screenshotBefore, screenshotAfter
               )
             );
+            break;
           }
         } catch {
           // continue
@@ -123,7 +131,7 @@ export class XssPlugin extends BasePlugin {
 
   private async checkDialogTriggered(ctx: PluginContext): Promise<boolean> {
     try {
-      const dialogPromise = new Promise<boolean>((resolve) => {
+      return await new Promise<boolean>((resolve) => {
         const handler = () => {
           ctx.page.removeListener('dialog', handler);
           resolve(true);
@@ -134,7 +142,6 @@ export class XssPlugin extends BasePlugin {
           resolve(false);
         }, 1500);
       });
-      return await dialogPromise;
     } catch {
       return false;
     }

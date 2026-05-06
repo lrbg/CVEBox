@@ -208,7 +208,7 @@ export class HtmlReporter {
 <!-- Lightbox overlay for full-size screenshots -->
 <div class="lb-overlay" id="lb-overlay">
   <span class="lb-close" onclick="closeLightbox()">&#x2715;</span>
-  <img id="lb-img" src="" alt="Screenshot" />
+  <img id="lb-img" src="data:," alt="Screenshot" />
 </div>
 
 <script>

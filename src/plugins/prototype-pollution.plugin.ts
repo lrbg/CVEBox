@@ -41,13 +41,11 @@ export class PrototypePollutionPlugin extends BasePlugin {
 
     if (ctx.surfaces.includes('query-param')) {
       const qpSurface = new QueryParamSurface(ctx.page);
-      const queryPayloads = this.payloads.filter(
-        (p) => (p as any).surface === 'query-param'
-      );
+      const queryPayloads = this.payloads.filter((p) => (p as any).surface === 'query-param');
+      const screenshotBefore = await takeScreenshot(ctx.page);
 
       for (const payload of queryPayloads) {
         try {
-          const screenshotBefore = await takeScreenshot(ctx.page);
           const result = await qpSurface.injectRaw(ctx.target.url, payload.value);
           const isPolluted =
             result.includes(POLLUTION_MARKER) ||
@@ -62,6 +60,7 @@ export class PrototypePollutionPlugin extends BasePlugin {
                 REMEDIATION, screenshotBefore, screenshotAfter
               )
             );
+            break;
           }
         } catch {
           // continue
@@ -72,14 +71,12 @@ export class PrototypePollutionPlugin extends BasePlugin {
     if (ctx.surfaces.includes('api-body')) {
       const apiSurface = new ApiBodySurface(ctx.page);
       const endpoints = await apiSurface.discoverEndpoints();
-      const bodyPayloads = this.payloads.filter(
-        (p) => (p as any).surface === 'api-body'
-      );
+      const bodyPayloads = this.payloads.filter((p) => (p as any).surface === 'api-body');
 
       for (const endpoint of endpoints) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of bodyPayloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await apiSurface.injectRaw(endpoint.url, endpoint.method, payload.value);
             const isPolluted =
               result.includes(POLLUTION_MARKER) ||
@@ -94,6 +91,7 @@ export class PrototypePollutionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue

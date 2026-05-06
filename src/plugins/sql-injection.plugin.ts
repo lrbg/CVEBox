@@ -49,11 +49,11 @@ export class SqlInjectionPlugin extends BasePlugin {
     if (ctx.surfaces.includes('form')) {
       const formSurface = new FormSurface(ctx.page);
       const fields = await formSurface.discoverFields();
-
+      // One screenshot per field, not per payload
       for (const field of fields) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await formSurface.inject(field, payload.value);
             if (this.isVulnerableResponse(result, SQL_ERROR_PATTERNS)) {
               const screenshotAfter = await takeScreenshot(ctx.page);
@@ -64,9 +64,10 @@ export class SqlInjectionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break; // one confirmed finding per field is enough
             }
           } catch {
-            // continue on individual field errors
+            // continue
           }
         }
       }
@@ -75,11 +76,10 @@ export class SqlInjectionPlugin extends BasePlugin {
     if (ctx.surfaces.includes('query-param')) {
       const qpSurface = new QueryParamSurface(ctx.page);
       const params = await qpSurface.discoverParams(ctx.target.url);
-
       for (const param of params) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await qpSurface.inject(ctx.target.url, param, payload.value);
             if (this.isVulnerableResponse(result, SQL_ERROR_PATTERNS)) {
               const screenshotAfter = await takeScreenshot(ctx.page);
@@ -90,6 +90,7 @@ export class SqlInjectionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
@@ -101,11 +102,10 @@ export class SqlInjectionPlugin extends BasePlugin {
     if (ctx.surfaces.includes('api-body')) {
       const apiSurface = new ApiBodySurface(ctx.page);
       const endpoints = await apiSurface.discoverEndpoints();
-
       for (const endpoint of endpoints) {
+        const screenshotBefore = await takeScreenshot(ctx.page);
         for (const payload of this.payloads) {
           try {
-            const screenshotBefore = await takeScreenshot(ctx.page);
             const result = await apiSurface.inject(endpoint.url, endpoint.method, endpoint.sampleBody, payload.value);
             if (this.isVulnerableResponse(result, SQL_ERROR_PATTERNS)) {
               const screenshotAfter = await takeScreenshot(ctx.page);
@@ -116,6 +116,7 @@ export class SqlInjectionPlugin extends BasePlugin {
                   REMEDIATION, screenshotBefore, screenshotAfter
                 )
               );
+              break;
             }
           } catch {
             // continue
