@@ -1,0 +1,40 @@
+{
+  "name": "cvebox",
+  "version": "1.0.0",
+  "description": "CLI security scanner for web applications - SQL, NoSQL, XSS, SSTI, Prototype Pollution",
+  "main": "dist/cli/index.js",
+  "bin": {
+    "cvebox": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/cli/index.ts",
+    "start:pipeline": "ts-node src/cli/index.ts --pipeline",
+    "dev": "ts-node src/cli/index.ts",
+    "lint": "eslint src/**/*.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.44.0",
+    "chalk": "^4.1.2",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
+    "inquirer": "^8.2.6",
+    "playwright": "^1.44.0",
+    "handlebars": "^4.7.8",
+    "ora": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "figlet": "^1.7.0",
+    "dayjs": "^1.11.11"
+  },
+  "devDependencies": {
+    "@types/inquirer": "^8.2.10",
+    "@types/node": "^20.14.0",
+    "@types/figlet": "^1.5.8",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

